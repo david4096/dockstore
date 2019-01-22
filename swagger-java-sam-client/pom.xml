@@ -16,7 +16,7 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>io.swagger</groupId>
+                <groupId>io.swagger.codegen.v3</groupId>
                 <artifactId>swagger-codegen-maven-plugin</artifactId>
                 <executions>
                     <execution>
@@ -60,6 +60,10 @@
                                         <include>ManifestApi.java</include>
                                         <include>SecscanApi.java</include>
                                     </includes>
+                                </fileset>
+                                <fileset>
+                                    <!-- needed due to https://github.com/swagger-api/swagger-codegen/issues/8781 -->
+                                    <directory>target/generated-sources/swagger/src/test</directory>
                                 </fileset>
                             </filesets>
                         </configuration>
@@ -221,7 +225,7 @@
 
 
         <dependency>
-            <groupId>io.swagger</groupId>
+            <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-annotations</artifactId>
             <version>${swagger-annotations-version}</version>
         </dependency>

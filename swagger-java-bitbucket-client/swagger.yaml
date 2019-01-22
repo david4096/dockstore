@@ -6174,10 +6174,6 @@ paths:
       description: |-
         Returns a paginated list of all the watchers on the specified
         repository.
-  '/repositories/{username}/{repo_slug}/properties/{app_key}/{property_name}':
-    put: {}
-    get: {}
-    delete: {}
   '/snippets/{username}/{encoded_id}/commits':
     parameters:
       - required: true
