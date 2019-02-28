@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,14 +15,20 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import io.dockstore.webservice.helpers.EntryStarredSerializer;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.hibernate.annotations.CreationTimestamp;
@@ -80,7 +88,7 @@ public class Organization implements Serializable {
     @Column
     @ApiModelProperty(value = "Set of users in the organization", required = true, position = 7)
     @OneToMany(mappedBy = "organization", fetch = FetchType.LAZY)
-    private Set<OrganizationUser> users = new HashSet<>();
+    private Set<OrganizationUser> users;
 
     @Column
     @ApiModelProperty(value = "Short description of the organization", position = 8)
@@ -91,6 +99,13 @@ public class Organization implements Serializable {
     @Size(min = 3, max = 50)
     @ApiModelProperty(value = "Display name for an organization (Ex. Ontario Institute for Cancer Research). Not used for links.", position = 9)
     private String displayName;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "starred_organizations", inverseJoinColumns = @JoinColumn(name = "userid", nullable = false, updatable = false, referencedColumnName = "id"), joinColumns = @JoinColumn(name = "organizationid", nullable = false, updatable = false, referencedColumnName = "id"))
+    @ApiModelProperty(value = "This indicates the users that have starred this organization, dockstore specific", required = false, position = 10)
+//    @JsonSerialize(using = EntryStarredSerializer.class)
+    @OrderBy("id")
+    private SortedSet<User> starredUsers;
 
     @JsonIgnore
     @OneToMany(mappedBy = "organization")
@@ -103,6 +118,17 @@ public class Organization implements Serializable {
     @Column()
     @UpdateTimestamp
     private Timestamp dbUpdateDate;
+
+    public Organization() {
+        users = new HashSet<>();
+        starredUsers = new TreeSet<>();
+    }
+
+    public Organization(long id) {
+        this.id = id;
+        users = new HashSet<>();
+        starredUsers = new TreeSet<>();
+    }
 
     public long getId() {
         return id;
@@ -174,6 +200,18 @@ public class Organization implements Serializable {
 
     public void setUsers(Set<OrganizationUser> users) {
         this.users = users;
+    }
+
+    public Set<User> getStarredUsers() {
+        return starredUsers;
+    }
+
+    public void addStarredUser(User user) {
+        starredUsers.add(user);
+    }
+
+    public boolean removeStarredUser(User user) {
+        return starredUsers.remove(user);
     }
 
     public Set<Collection> getCollections() {

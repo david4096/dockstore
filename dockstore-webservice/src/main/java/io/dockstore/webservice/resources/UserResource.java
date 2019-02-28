@@ -42,6 +42,7 @@ import io.dockstore.common.Registry;
 import io.dockstore.webservice.CustomWebApplicationException;
 import io.dockstore.webservice.core.Entry;
 import io.dockstore.webservice.core.ExtendedUserData;
+import io.dockstore.webservice.core.Organization;
 import io.dockstore.webservice.core.OrganizationUser;
 import io.dockstore.webservice.core.Token;
 import io.dockstore.webservice.core.TokenType;
@@ -535,6 +536,17 @@ public class UserResource implements AuthenticatedResourceInterface {
     public Set<Entry> getStarredWorkflows(@ApiParam(hidden = true) @Auth User user) {
         User u = userDAO.findById(user.getId());
         return u.getStarredEntries().stream().filter(element -> element instanceof Workflow)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    @GET
+    @Timed
+    @UnitOfWork
+    @Path("/starredOrganizations")
+    @ApiOperation(value = "Get the logged-in user's starred Organizations.", authorizations = { @Authorization(value = JWT_SECURITY_DEFINITION_NAME) }, response = Organization.class, responseContainer = "List")
+    public Set<Organization> getStarredOrganizations(@ApiParam(hidden = true) @Auth User user) {
+        User u = userDAO.findById(user.getId());
+        return u.getStarredOrganizations().stream().filter(element -> element instanceof Organization)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
