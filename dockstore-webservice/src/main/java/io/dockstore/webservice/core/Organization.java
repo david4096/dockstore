@@ -4,9 +4,9 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.TreeSet;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -100,12 +100,12 @@ public class Organization implements Serializable {
     @ApiModelProperty(value = "Display name for an organization (Ex. Ontario Institute for Cancer Research). Not used for links.", position = 9)
     private String displayName;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinTable(name = "starred_organizations", inverseJoinColumns = @JoinColumn(name = "userid", nullable = false, updatable = false, referencedColumnName = "id"), joinColumns = @JoinColumn(name = "organizationid", nullable = false, updatable = false, referencedColumnName = "id"))
     @ApiModelProperty(value = "This indicates the users that have starred this organization, dockstore specific", required = false, position = 10)
-//    @JsonSerialize(using = EntryStarredSerializer.class)
+    @JsonSerialize(using = EntryStarredSerializer.class)
     @OrderBy("id")
-    private SortedSet<User> starredUsers;
+    private Set<User> starredUsers;
 
     @JsonIgnore
     @OneToMany(mappedBy = "organization")
@@ -120,13 +120,11 @@ public class Organization implements Serializable {
     private Timestamp dbUpdateDate;
 
     public Organization() {
-        users = new HashSet<>();
         starredUsers = new TreeSet<>();
     }
 
     public Organization(long id) {
         this.id = id;
-        users = new HashSet<>();
         starredUsers = new TreeSet<>();
     }
 

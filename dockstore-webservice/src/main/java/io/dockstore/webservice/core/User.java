@@ -149,7 +149,7 @@ public class User implements Principal, Comparable<User>, Serializable {
     @ApiModelProperty(value = "Organizations in dockstore that this user starred", position = 14)
     @OrderBy("id")
     @JsonIgnore
-    private final SortedSet<Organization> starredOrganizations;
+    private final Set<Organization> starredOrganizations;
 
     public User() {
         entries = new TreeSet<>();
