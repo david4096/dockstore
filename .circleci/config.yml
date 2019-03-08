@@ -79,5 +79,5 @@ workflows:
     jobs:
       - unit-tests
       - integration-tests
-        requires:
-          - unit-tests
+          requires:
+            - unit-tests
