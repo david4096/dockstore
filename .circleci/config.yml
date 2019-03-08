@@ -1,14 +1,14 @@
 version: 2
 aliases:
   - &job_config
-    docker: # run the steps with Docker
-      - image: circleci/openjdk:10.0.2-13
-        environment:
-          PGHOST: 127.0.0.1
-      - image: circleci/postgres:9.6.5-alpine-ram
-        environment:
-          POSTGRES_USER: postgres
-          POSTGRES_DB: postgres
+      docker: # run the steps with Docker
+        - image: circleci/openjdk:10.0.2-13
+          environment:
+            PGHOST: 127.0.0.1
+        - image: circleci/postgres:9.6.5-alpine-ram
+          environment:
+            POSTGRES_USER: postgres
+            POSTGRES_DB: postgres
       steps: # a collection of executable commands
         - checkout # check out source code to working directory
         - restore_cache: # restore the saved cache after the first run or if `pom.xml` has changed
@@ -79,5 +79,5 @@ workflows:
     jobs:
       - unit-tests
       - integration-tests
-          requires:
-            - unit-tests
+        requires:
+          - unit-tests
