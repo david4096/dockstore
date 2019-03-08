@@ -78,6 +78,6 @@ workflows:
   build-unit-tests-and-coverage:
     jobs:
       - unit-tests
-      - integration-tests
+      - integration-tests:
           requires:
             - unit-tests
