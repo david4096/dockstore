@@ -75,12 +75,12 @@ workflows:
   build-unit-tests-and-coverage:
     jobs:
       - unit-tests:
-        filters:
-          branches:
-            ignore: gh-pages
+          filters:
+            branches:
+              ignore: gh-pages
       - integration-tests:
           requires:
             - unit-tests
-        filters:
-          branches:
-            ignore: gh-pages
+          filters:
+            branches:
+              ignore: gh-pages
