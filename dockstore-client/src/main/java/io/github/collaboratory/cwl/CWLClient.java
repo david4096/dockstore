@@ -54,8 +54,9 @@ import io.dockstore.client.cli.nested.CromwellLauncher;
 import io.dockstore.client.cli.nested.CwltoolLauncher;
 import io.dockstore.client.cli.nested.LanguageClientInterface;
 import io.dockstore.client.cli.nested.LauncherFiles;
-import io.dockstore.client.cli.nested.NotificationsClients.NotificationsClient;
+import io.dockstore.client.cli.nested.WESLauncher;
 import io.dockstore.client.cli.nested.WorkflowClient;
+import io.dockstore.client.cli.nested.notificationsclients.NotificationsClient;
 import io.dockstore.common.FileProvisioning;
 import io.dockstore.common.LanguageType;
 import io.dockstore.common.Utilities;
@@ -98,6 +99,7 @@ public class CWLClient extends BaseLanguageClient implements LanguageClientInter
     private static final String DEFAULT_LAUNCHER = "cwltool";
     private static final String CWL_TOOL = "cwltool";
     private static final String CROMWELL = "cromwell";
+    private static final String WES = "wes";
 
     protected final Yaml yaml = new Yaml(new SafeConstructor());
     protected final Gson gson = CWL.getTypeSafeCWLToolDocument();
@@ -111,12 +113,19 @@ public class CWLClient extends BaseLanguageClient implements LanguageClientInter
 
         fileProvisioning = new FileProvisioning(abstractEntryClient.getConfigFile());
 
-        // Set the launcher
-        INIConfiguration config = Utilities.parseConfig(abstractEntryClient.getConfigFile());
-        cwlLauncherType = config.getString(CWL_RUNNER, DEFAULT_LAUNCHER);
+        if (!abstractEntryClient.isWesCommand()) {
+            // Set the launcher
+            INIConfiguration config = Utilities.parseConfig(abstractEntryClient.getConfigFile());
+            cwlLauncherType = config.getString(CWL_RUNNER, DEFAULT_LAUNCHER);
+        } else {
+            cwlLauncherType = WES;
+        }
 
         BaseLauncher launcher;
         switch (cwlLauncherType) {
+        case WES:
+            launcher = new WESLauncher(abstractEntryClient, LanguageType.CWL, SCRIPT.get());
+            break;
         case CROMWELL:
             launcher = new CromwellLauncher(abstractEntryClient, LanguageType.CWL, SCRIPT.get());
             LOG.info("Cromwell is currently in beta for CWL tools and workflows.");
@@ -126,7 +135,6 @@ public class CWLClient extends BaseLanguageClient implements LanguageClientInter
             launcher = new CwltoolLauncher(abstractEntryClient, LanguageType.CWL, SCRIPT.get());
             break;
         }
-
         this.setLauncher(launcher);
     }
 
@@ -328,14 +336,14 @@ public class CWLClient extends BaseLanguageClient implements LanguageClientInter
                 } else if (matchSteps.find()) {
                     stepsFound = true;
                 } else {
-                    if (abstractEntryClient.getEntryType().toLowerCase().equals("workflow") && matchWf.find()) {
+                    if (abstractEntryClient.getEntryType().equalsIgnoreCase("workflow") && matchWf.find()) {
                         classWfFound = true;
-                    } else if (abstractEntryClient.getEntryType().toLowerCase().equals("tool") && matchTool.find()) {
+                    } else if (abstractEntryClient.getEntryType().equalsIgnoreCase("tool") && matchTool.find()) {
                         classToolFound = true;
-                    } else if ((abstractEntryClient.getEntryType().toLowerCase().equals("tool") && matchWf.find())) {
+                    } else if ((abstractEntryClient.getEntryType().equalsIgnoreCase("tool") && matchWf.find())) {
                         errorMessage("Expected a tool but the CWL file specified a workflow. Use 'dockstore workflow launch ...' instead.",
                             CLIENT_ERROR);
-                    } else if (abstractEntryClient.getEntryType().toLowerCase().equals("workflow") && matchTool.find()) {
+                    } else if (abstractEntryClient.getEntryType().equalsIgnoreCase("workflow") && matchTool.find()) {
                         errorMessage("Expected a workflow but the CWL file specified a tool. Use 'dockstore tool launch ...' instead.",
                             CLIENT_ERROR);
                     }
