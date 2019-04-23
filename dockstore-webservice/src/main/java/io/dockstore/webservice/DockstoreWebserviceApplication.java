@@ -67,6 +67,7 @@ import io.dockstore.webservice.resources.HostedToolResource;
 import io.dockstore.webservice.resources.HostedWorkflowResource;
 import io.dockstore.webservice.resources.MetadataResource;
 import io.dockstore.webservice.resources.OrganizationResource;
+import io.dockstore.webservice.resources.ServicesResource;
 import io.dockstore.webservice.resources.TemplateHealthCheck;
 import io.dockstore.webservice.resources.TokenResource;
 import io.dockstore.webservice.resources.UserResource;
@@ -271,6 +272,7 @@ public class DockstoreWebserviceApplication extends Application<DockstoreWebserv
         environment.jersey().register(new HostedWorkflowResource(getHibernate().getSessionFactory(), authorizer, configuration.getLimitConfig()));
         environment.jersey().register(new OrganizationResource(getHibernate().getSessionFactory()));
         environment.jersey().register(new CollectionResource(getHibernate().getSessionFactory()));
+        environment.jersey().register(new ServicesResource(getHibernate().getSessionFactory()));
         environment.jersey().register(OpenApiResource.class);
         environment.jersey().register(OpenAPIDescription.class);
 
