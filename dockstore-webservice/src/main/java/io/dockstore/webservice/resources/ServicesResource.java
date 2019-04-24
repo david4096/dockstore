@@ -29,32 +29,35 @@ public class ServicesResource {
     }
 
     @GET
-    @ApiOperation("List all published services")
-    public List<Service> getPublishedServices() {
+    @ApiOperation(value = "List all published services, optionally filtering by subclass", response = Service.class, responseContainer = "List")
+    public List<Service> getPublishedServices(@ApiParam(value = "Filter by subclass") @QueryParam("subclass") @DefaultValue("") String subclass) {
         return new ArrayList<>();
     }
 
     @GET
-    @Path("{serviceId}")
-    public Service getService(
-            @ApiParam(value = "Filter by subclass") @QueryParam("subclass") @DefaultValue("") String subclass) {
+    @Path("/{serviceId}")
+    @ApiOperation(value = "Fetches the specified service version", response = Service.class)
+    public Service getService() {
         return null;
     }
 
     @GET
-    @Path("{serviceId}/versions")
+    @Path("/{serviceId}/versions")
+    @ApiOperation(value = "Gets all versions of the specified version", response = ServiceVersion.class, responseContainer = "List")
     public List<ServiceVersion> getServiceVersions(@PathParam("serviceId") Long serviceId) {
         return new ArrayList<>();
     }
 
     @GET
-    @Path("{serviceId}/versions/{versionId}")
+    @Path("/{serviceId}/versions/{versionId}")
+    @ApiOperation(value = "Gets the specified service version", response = ServiceVersion.class)
     public ServiceVersion getServiceVersion(@PathParam("serviceId") Long serviceId, @PathParam("versionId") Long versionId) {
         return null;
     }
 
     @GET
-    @Path("{serviceId}/versions/{versionId}/")
+    @Path("/{serviceId}/versions/{versionId}/content")
+    @ApiOperation(value = "Downloads the content of a service version as a zip.")
     @Produces("application/zip")
     public Response downloadVersion(@PathParam("serviceId") Long serviceId, @PathParam("versionId") Long versionId) {
         return Response.ok().build();

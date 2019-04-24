@@ -403,6 +403,10 @@ components:
         url:
           type: string
       type: object
+    Service:
+      type: object
+    ServiceVersion:
+      type: object
     SharedWorkflows:
       properties:
         role:
@@ -3800,6 +3804,97 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Collection'
+          description: default response
+  /services:
+    get:
+      operationId: getPublishedServices
+      parameters:
+      - in: query
+        name: subclass
+        schema:
+          default: ""
+          type: string
+      responses:
+        default:
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Service'
+                type: array
+          description: default response
+  /services/{serviceId}:
+    get:
+      operationId: getService
+      responses:
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'
+          description: default response
+  /services/{serviceId}/versions:
+    get:
+      operationId: getServiceVersions
+      parameters:
+      - in: path
+        name: serviceId
+        required: true
+        schema:
+          format: int64
+          type: integer
+      responses:
+        default:
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ServiceVersion'
+                type: array
+          description: default response
+  /services/{serviceId}/versions/{versionId}:
+    get:
+      operationId: getServiceVersion
+      parameters:
+      - in: path
+        name: serviceId
+        required: true
+        schema:
+          format: int64
+          type: integer
+      - in: path
+        name: versionId
+        required: true
+        schema:
+          format: int64
+          type: integer
+      responses:
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceVersion'
+          description: default response
+  /services/{serviceId}/versions/{versionId}/content:
+    get:
+      operationId: downloadVersion
+      parameters:
+      - in: path
+        name: serviceId
+        required: true
+        schema:
+          format: int64
+          type: integer
+      - in: path
+        name: versionId
+        required: true
+        schema:
+          format: int64
+          type: integer
+      responses:
+        default:
+          content:
+            application/zip: {}
           description: default response
   /users/checkUser/{username}:
     get:

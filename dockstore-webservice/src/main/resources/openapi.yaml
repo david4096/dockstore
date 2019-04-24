@@ -41,6 +41,7 @@ tags:
   - name: metadata
     description: Information about Dockstore like RSS, sitemap, lists of dependencies, etc.
   - name: organizations
+  - name: services
   - name: tokens
     description: List, modify, refresh, and delete tokens for external services
   - name: users
@@ -3973,6 +3974,116 @@ paths:
       security:
         - BEARER:
             []
+  /services:
+    get:
+      tags:
+        - services
+      summary: List all published services, optionally filtering by subclass
+      description: ""
+      operationId: getPublishedServices
+      parameters:
+        - name: subclass
+          in: query
+          description: Filter by subclass
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Service"
+  "/services/{serviceId}":
+    get:
+      tags:
+        - services
+      summary: Fetches the specified service version
+      description: ""
+      operationId: getService
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Service"
+  "/services/{serviceId}/versions":
+    get:
+      tags:
+        - services
+      summary: Gets all versions of the specified version
+      description: ""
+      operationId: getServiceVersions
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ServiceVersion"
+  "/services/{serviceId}/versions/{versionId}":
+    get:
+      tags:
+        - services
+      summary: Gets the specified service version
+      description: ""
+      operationId: getServiceVersion
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: versionId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceVersion"
+  "/services/{serviceId}/versions/{versionId}/content":
+    get:
+      tags:
+        - services
+      summary: Downloads the content of a service version as a zip.
+      description: ""
+      operationId: downloadVersion
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: versionId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        default:
+          description: successful operation
   "/users/checkUser/{username}":
     get:
       tags:
@@ -7041,6 +7152,10 @@ components:
           type: string
         enum:
           type: string
+    Service:
+      type: object
+    ServiceVersion:
+      type: object
     SharedWorkflows:
       type: object
       properties:
