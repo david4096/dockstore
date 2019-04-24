@@ -2844,7 +2844,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Entry'
+                $ref: '#/components/schemas/Aliasable'
           description: default response
   /entries/{id}/collections:
     get:
@@ -3826,6 +3826,13 @@ paths:
   /services/{serviceId}:
     get:
       operationId: getService
+      parameters:
+      - in: path
+        name: serviceId
+        required: true
+        schema:
+          format: int64
+          type: integer
       responses:
         default:
           content:
@@ -4521,7 +4528,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Workflow'
+                $ref: '#/components/schemas/Entry'
           description: default response
   /workflows/hostedEntry/{entryId}:
     delete:

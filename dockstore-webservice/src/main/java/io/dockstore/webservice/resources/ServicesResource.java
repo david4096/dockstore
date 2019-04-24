@@ -37,7 +37,7 @@ public class ServicesResource {
     @GET
     @Path("/{serviceId}")
     @ApiOperation(value = "Fetches the specified service version", response = Service.class)
-    public Service getService() {
+    public Service getService(@PathParam("serviceId") Long serviceId) {
         return null;
     }
 
