@@ -10,7 +10,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import io.dockstore.webservice.core.Service;
 import io.dockstore.webservice.core.ServiceVersion;
@@ -55,11 +54,4 @@ public class ServicesResource {
         return null;
     }
 
-    @GET
-    @Path("/{serviceId}/versions/{versionId}/content")
-    @ApiOperation(value = "Downloads the content of a service version as a zip.")
-    @Produces("application/zip")
-    public Response downloadVersion(@PathParam("serviceId") Long serviceId, @PathParam("versionId") Long versionId) {
-        return Response.ok().build();
-    }
 }

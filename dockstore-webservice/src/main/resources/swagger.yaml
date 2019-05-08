@@ -4,7 +4,7 @@ info:
   description: "This describes the dockstore API, a webservice that manages pairs\
     \ of Docker images and associated metadata such as CWL documents and Dockerfiles\
     \ used to build those images"
-  version: "1.7.0-alpha.1"
+  version: "1.7.0-alpha.2-SNAPSHOT"
   title: "Dockstore API"
   termsOfService: "TBD"
   contact:
@@ -409,6 +409,29 @@ paths:
             type: "array"
             items:
               $ref: "#/definitions/ToolTestsV1"
+  /api/ga4gh/v2/extended:
+    get:
+      tags:
+      - "extendedGA4GH"
+      summary: "List all published services, optionally filtering by subclass"
+      description: ""
+      operationId: "getPublishedServices"
+      produces:
+      - "application/json"
+      - "text/plain"
+      parameters:
+      - name: "subclass"
+        in: "query"
+        description: "Filter by subclass"
+        required: false
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Service"
   /api/ga4gh/v2/extended/containers/{organization}:
     get:
       tags:
@@ -607,6 +630,76 @@ paths:
             $ref: "#/definitions/Error"
       security:
       - BEARER: []
+  /api/ga4gh/v2/extended/{serviceId}:
+    get:
+      tags:
+      - "extendedGA4GH"
+      summary: "Fetches the specified service version"
+      description: ""
+      operationId: "getService"
+      produces:
+      - "application/json"
+      - "text/plain"
+      parameters:
+      - name: "serviceId"
+        in: "path"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Service"
+  /api/ga4gh/v2/extended/{serviceId}/versions:
+    get:
+      tags:
+      - "extendedGA4GH"
+      summary: "Gets all versions of the specified version"
+      description: ""
+      operationId: "getServiceVersions"
+      produces:
+      - "application/json"
+      - "text/plain"
+      parameters:
+      - name: "serviceId"
+        in: "path"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/ServiceVersion"
+  /api/ga4gh/v2/extended/{serviceId}/versions/{versionId}:
+    get:
+      tags:
+      - "extendedGA4GH"
+      summary: "Gets the specified service version"
+      description: ""
+      operationId: "getServiceVersion"
+      produces:
+      - "application/json"
+      - "text/plain"
+      parameters:
+      - name: "serviceId"
+        in: "path"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "versionId"
+        in: "path"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ServiceVersion"
   /api/ga4gh/v2/metadata:
     get:
       tags:
@@ -3675,7 +3768,12 @@ paths:
       operationId: "getService"
       produces:
       - "application/json"
-      parameters: []
+      parameters:
+      - name: "serviceId"
+        in: "path"
+        required: true
+        type: "integer"
+        format: "int64"
       responses:
         200:
           description: "successful operation"
@@ -3728,29 +3826,6 @@ paths:
           description: "successful operation"
           schema:
             $ref: "#/definitions/ServiceVersion"
-  /services/{serviceId}/versions/{versionId}/content:
-    get:
-      tags:
-      - "services"
-      summary: "Downloads the content of a service version as a zip."
-      description: ""
-      operationId: "downloadVersion"
-      produces:
-      - "application/zip"
-      parameters:
-      - name: "serviceId"
-        in: "path"
-        required: true
-        type: "integer"
-        format: "int64"
-      - name: "versionId"
-        in: "path"
-        required: true
-        type: "integer"
-        format: "int64"
-      responses:
-        default:
-          description: "successful operation"
   /users/checkUser/{username}:
     get:
       tags:
@@ -6048,6 +6123,10 @@ definitions:
       custom_docker_registry_path:
         type: "string"
         readOnly: true
+      last_modified_date:
+        type: "string"
+        format: "date-time"
+        readOnly: true
       has_checker:
         type: "boolean"
         readOnly: true
@@ -6063,10 +6142,6 @@ definitions:
         uniqueItems: true
         items:
           $ref: "#/definitions/FileFormat"
-      last_modified_date:
-        type: "string"
-        format: "date-time"
-        readOnly: true
       author:
         type: "string"
         position: 1
@@ -6263,6 +6338,10 @@ definitions:
         type: "integer"
         format: "int64"
         description: "The Id of the corresponding topic on Dockstore Discuss"
+      last_modified_date:
+        type: "string"
+        format: "date-time"
+        readOnly: true
       has_checker:
         type: "boolean"
         readOnly: true
@@ -6278,10 +6357,6 @@ definitions:
         uniqueItems: true
         items:
           $ref: "#/definitions/FileFormat"
-      last_modified_date:
-        type: "string"
-        format: "date-time"
-        readOnly: true
       author:
         type: "string"
         position: 1
@@ -6679,8 +6754,52 @@ definitions:
         type: "string"
   Service:
     type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+        description: "Implementation specific ID for the service in this web service"
+      subClass:
+        type: "string"
+        description: "The type of service"
+        enum:
+        - "DOCKER_COMPOSE"
+        - "SWARM"
+        - "KUBERNETES"
+        - "HELM"
+      versions:
+        type: "array"
+        items:
+          $ref: "#/definitions/ServiceVersion"
+      gitUrl:
+        type: "string"
+        description: "The git URL of this service"
   ServiceVersion:
     type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+        description: "Implementation specific ID for the service version in this web\
+          \ service"
+      subClass:
+        type: "string"
+        description: "The subclass of this service"
+        enum:
+        - "DOCKER_COMPOSE"
+        - "SWARM"
+        - "KUBERNETES"
+        - "HELM"
+      sourceFiles:
+        type: "array"
+        description: "The .dockstore.yml, test parameter file(s), and readme for this\
+          \ service."
+        uniqueItems: true
+        items:
+          $ref: "#/definitions/SourceFile"
+      commitId:
+        type: "string"
+        description: "The service version's Git commit id"
   SharedWorkflows:
     type: "object"
     properties:
@@ -7329,6 +7448,10 @@ definitions:
         type: "integer"
         format: "int64"
         readOnly: true
+      last_modified_date:
+        type: "string"
+        format: "date-time"
+        readOnly: true
       has_checker:
         type: "boolean"
         readOnly: true
@@ -7344,10 +7467,6 @@ definitions:
         uniqueItems: true
         items:
           $ref: "#/definitions/FileFormat"
-      last_modified_date:
-        type: "string"
-        format: "date-time"
-        readOnly: true
       author:
         type: "string"
         position: 1
