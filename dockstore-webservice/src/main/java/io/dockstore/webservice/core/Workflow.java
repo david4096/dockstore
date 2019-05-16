@@ -54,6 +54,9 @@ import org.hibernate.annotations.Check;
  *
  * @author dyuen
  */
+
+// Do this instead https://stackoverflow.com/questions/21062148/how-to-query-postgres-on-optional-params
+// make an omnibus query
 @ApiModel(value = "Workflow", description = "This describes one workflow in the dockstore")
 @Entity
 @NamedQueries({
