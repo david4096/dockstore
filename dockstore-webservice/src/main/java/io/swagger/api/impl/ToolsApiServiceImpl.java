@@ -281,12 +281,17 @@ public class ToolsApiServiceImpl extends ToolsApiService implements Authenticate
         } else if (alias != null) {
             all.add(toolDAO.getGenericEntryByAlias(alias));
         } else {
+            // This should respect the paging information instead of grabbing all
             all.addAll(toolDAO.findAllPublished());
             all.addAll(workflowDAO.findAllPublished());
+            // Really? sort? who says?
             all.sort(Comparator.comparing(Entry::getGitUrl));
         }
 
+
         List<io.swagger.model.Tool> results = new ArrayList<>();
+        // Why can't the filtering be done via sql?
+        // Rewrite as a stream filter? parallelize?
         for (Entry c : all) {
             // filters just for tools
             if (c instanceof Tool) {
@@ -358,12 +363,15 @@ public class ToolsApiServiceImpl extends ToolsApiService implements Authenticate
                     continue;
                 }
             }
+            // This seems like a costly operation -- why ????
             // if passing, for each container that matches the criteria, convert to standardised format and return
             io.swagger.model.Tool tool = ToolsImplCommon.convertEntryToTool(c, config);
             if (tool != null) {
                 results.add(tool);
             }
         }
+
+        // It is very upsetting to see paging not being done via SQL
 
         if (limit == null) {
             limit = DEFAULT_PAGE_SIZE;
