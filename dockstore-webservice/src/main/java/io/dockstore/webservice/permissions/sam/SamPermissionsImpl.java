@@ -1,7 +1,7 @@
 package io.dockstore.webservice.permissions.sam;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,7 +63,7 @@ public class SamPermissionsImpl implements PermissionsInterface {
      * in the <code>samPermissionMap</code>.
      */
     private static Map<Role, String> permissionSamMap = samPermissionMap.entrySet().stream()
-            .collect(Collectors.toMap(Map.Entry::getValue, c -> c.getKey()));
+            .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
 
     private DockstoreWebserviceConfiguration config;
     private final TokenDAO tokenDAO;
@@ -104,7 +104,7 @@ public class SamPermissionsImpl implements PermissionsInterface {
             final String samPolicyName = permissionSamMap.get(permission.getRole());
             ensurePolicyExists(resourcePolicies, samPolicyName, encodedPath, resourcesApi);
             // If the email does not already belong to the policy, add it.
-            if (!policiesNewUserBelongsTo.stream().anyMatch(entry -> entry.getPolicyName().equals(samPolicyName))) {
+            if (policiesNewUserBelongsTo.stream().noneMatch(entry -> entry.getPolicyName().equals(samPolicyName))) {
                 resourcesApi.addUserToPolicy(SamConstants.RESOURCE_TYPE, encodedPath, samPolicyName,
                         permission.getEmail());
             }
@@ -116,7 +116,7 @@ public class SamPermissionsImpl implements PermissionsInterface {
             }
             return getPermissionsForWorkflow(requester, workflow);
         } catch (ApiException e) {
-            String errorMessage = readValue(e, ErrorReport.class).map(errorReport -> errorReport.getMessage())
+            String errorMessage = readValue(e, ErrorReport.class).map(ErrorReport::getMessage)
                     .orElse("Error setting permission");
             LOG.error(errorMessage, e);
             throw new CustomWebApplicationException(errorMessage, e.getCode());
@@ -165,11 +165,7 @@ public class SamPermissionsImpl implements PermissionsInterface {
             return weedOutDuplicateResourceIds(resourceAndAccessPolicies).stream()
                     .collect(Collectors.groupingBy(ResourceAndAccessPolicy::getAccessPolicyName)).entrySet().stream()
                     .collect(Collectors.toMap(e -> samPolicyNameToRole(e.getKey()), e -> e.getValue().stream().map(r -> {
-                        try {
-                            return URLDecoder.decode(r.getResourceId().substring(SamConstants.ENCODED_WORKFLOW_PREFIX.length()), "UTF-8");
-                        } catch (UnsupportedEncodingException e1) {
-                            return null;
-                        }
+                        return URLDecoder.decode(r.getResourceId().substring(SamConstants.ENCODED_WORKFLOW_PREFIX.length()), StandardCharsets.UTF_8);
                     }).collect(Collectors.toList())));
         } catch (ApiException e) {
             LOG.error("Error getting shared workflows", e);
@@ -379,7 +375,7 @@ public class SamPermissionsImpl implements PermissionsInterface {
                 LOG.error(MessageFormat.format("Error getting resource policies for {}", resourceId), e);
                 throw new CustomWebApplicationException("Error getting resource policies", e.getCode());
             }
-            if (!entries.stream().noneMatch(entry -> {
+            if (entries.stream().anyMatch(entry -> {
                 if (entry.getPolicyName().equals(SamConstants.OWNER_POLICY)) {
                     return entry.getPolicy().getMemberEmails().size() > 1; // There should be one owner
                 } else {
@@ -397,7 +393,7 @@ public class SamPermissionsImpl implements PermissionsInterface {
             return resourcesApi.listResourcesAndPolicies(SamConstants.RESOURCE_TYPE)
                     .stream()
                     .filter(p -> SamConstants.OWNER_POLICY.equals(p.getAccessPolicyName()))
-                    .map(p -> p.getResourceId())
+                    .map(ResourceAndAccessPolicy::getResourceId)
                     .collect(Collectors.toList());
         } catch (ApiException e) {
             if (e.getCode() == HttpStatus.SC_UNAUTHORIZED) {
@@ -424,9 +420,7 @@ public class SamPermissionsImpl implements PermissionsInterface {
     }
 
     private String encodedWorkflowResource(Workflow workflow, ApiClient apiClient) {
-        final StringBuilder sb = new StringBuilder(SamConstants.WORKFLOW_PREFIX);
-        sb.append(workflow.getWorkflowPath());
-        return apiClient.escapeString(sb.toString());
+        return apiClient.escapeString(SamConstants.WORKFLOW_PREFIX + workflow.getWorkflowPath());
     }
 
     /**
@@ -493,7 +487,7 @@ public class SamPermissionsImpl implements PermissionsInterface {
     List<Permission> removeDuplicateEmails(List<Permission> permissionList) {
         // A map of email to permissions.
         final Map<String, Permission> map = new HashMap<>();
-        permissionList.stream().forEach(permission -> {
+        permissionList.forEach(permission -> {
             final Permission existing = map.get(permission.getEmail());
             if (existing == null || existing.getRole().ordinal() > permission.getRole().ordinal()) {
                 map.put(permission.getEmail(), permission);

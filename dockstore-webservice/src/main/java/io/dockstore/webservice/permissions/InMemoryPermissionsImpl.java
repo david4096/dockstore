@@ -75,15 +75,15 @@ public class InMemoryPermissionsImpl implements PermissionsInterface {
     public Map<Role, List<String>> workflowsSharedWithUser(User user) {
         final String userKey = userKey(user);
         final Map<Role, List<String>> map = new HashMap<>();
-        resourceToUsersAndRolesMap.entrySet().stream().forEach(e -> {
-            final Role role = e.getValue().get(userKey);
+        resourceToUsersAndRolesMap.forEach((key, value) -> {
+            final Role role = value.get(userKey);
             if (role != null) {
                 List<String> workflows = map.get(role);
                 if (workflows == null) {
                     workflows = new ArrayList<>();
                     map.put(role, workflows);
                 }
-                workflows.add(e.getKey());
+                workflows.add(key);
             }
         });
         return map;
@@ -185,7 +185,7 @@ public class InMemoryPermissionsImpl implements PermissionsInterface {
             throw new CustomWebApplicationException("The user is sharing at least one workflow and cannot be deleted.",
                     HttpStatus.SC_BAD_REQUEST);
         } else {
-            user.getEntries().stream().forEach(e -> {
+            user.getEntries().forEach(e -> {
                 if (e instanceof Workflow) {
                     resourceToUsersAndRolesMap.remove(((Workflow)e).getWorkflowPath());
                 }
@@ -199,9 +199,7 @@ public class InMemoryPermissionsImpl implements PermissionsInterface {
         return user.getEntries().stream().anyMatch(e -> {
             if (e instanceof Workflow) {
                 final Map<String, Role> map = resourceToUsersAndRolesMap.get(((Workflow)e).getWorkflowPath());
-                if (map != null && map.keySet().stream().anyMatch(u -> !userKey.equals(u))) {
-                    return true;
-                }
+                return map != null && map.keySet().stream().anyMatch(u -> !userKey.equals(u));
             }
             return false;
         });
@@ -228,7 +226,7 @@ public class InMemoryPermissionsImpl implements PermissionsInterface {
     private void checkIfOwner(User user, Workflow workflow, Map<String, Role> permissionMap) {
         final String userKey = userKey(user);
         if (!workflow.getUsers().contains(user)) {
-            if (permissionMap == null || !permissionMap.entrySet().stream().anyMatch(e -> e.getValue() == Role.OWNER && e.getKey().equals(userKey))) {
+            if (permissionMap == null || permissionMap.entrySet().stream().noneMatch(e -> e.getValue() == Role.OWNER && e.getKey().equals(userKey))) {
                 throw new CustomWebApplicationException("Forbidden", HttpStatus.SC_FORBIDDEN);
             }
         }

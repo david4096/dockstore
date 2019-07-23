@@ -805,7 +805,7 @@ public abstract class AbstractEntryClient<T> {
             }
         }
 
-        LanguageType content = checkFileContent(file);             //check the file content (wdl,cwl or "")
+        LanguageType content = checkFileContent(file);             // check the file content (wdl,cwl or "")
 
         if (ext.equals(LanguageType.CWL)) {
             if (content.equals(LanguageType.CWL)) {
@@ -991,7 +991,7 @@ public abstract class AbstractEntryClient<T> {
             out("Could not get WES section from config file");
         }
 
-        String wesEndpointUrl = ObjectUtils.firstNonNull(wesUrl, configSubNode.getString("url"));
+        String wesEndpointUrl = ObjectUtils.firstNonNull(wesUrl, Objects.requireNonNull(configSubNode).getString("url"));
         if (wesEndpointUrl == null || wesEndpointUrl.isEmpty()) {
             errorMessage("No WES URL found in config file and no WES URL entered on command line. Please add url: <url> to "
                     + "config file in a WES section or use --wes-url <url> option on the command line", CLIENT_ERROR);
@@ -1000,9 +1000,7 @@ public abstract class AbstractEntryClient<T> {
             wesApiClient.setBasePath(wesEndpointUrl);
         }
 
-        /**
-         * Setup authentication credentials for the WES URL
-         */
+        // Setup authentication credentials for the WES URL
         String wesAuthorizationCredentials = ObjectUtils.firstNonNull(wesCred, configSubNode.getString("authorization"));
         if (wesAuthorizationCredentials == null) {
             out("Could not set Authorization header. Authorization key not found in config file and not provided on the command line. "
@@ -1152,7 +1150,7 @@ public abstract class AbstractEntryClient<T> {
         String jsonRun = optVal(args, "--json", null);
         final String uuid = optVal(args, "--uuid", null);
 
-        if (!(yamlRun != null ^ jsonRun != null)) {
+        if ((yamlRun != null) == (jsonRun != null)) {
             errorMessage("One of  --json or --yaml is required", CLIENT_ERROR);
         }
         CWLClient client = new CWLClient(this);
@@ -1194,7 +1192,7 @@ public abstract class AbstractEntryClient<T> {
     private void launchWdl(String entry, final List<String> args, boolean isALocalEntry) throws ApiException {
         final String yamlRun = optVal(args, "--yaml", null);
         String jsonRun = optVal(args, "--json", null);
-        if (!(yamlRun != null ^ jsonRun != null)) {
+        if ((yamlRun != null) == (jsonRun != null)) {
             errorMessage("dockstore: Missing required flag: one of --json or --yaml", CLIENT_ERROR);
         }
         final String wdlOutputTarget = optVal(args, "--wdl-output-target", null);

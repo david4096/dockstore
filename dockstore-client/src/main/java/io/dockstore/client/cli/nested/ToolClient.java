@@ -18,6 +18,7 @@ package io.dockstore.client.cli.nested;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -137,7 +138,7 @@ public class ToolClient extends AbstractEntryClient<DockstoreTool> {
         for (DockstoreTool container : containers) {
             String descriptor = "No";
             String automated = "No";
-            String description = "";
+            String description;
             String gitUrl = "";
 
             if (container.isIsPublished()) {
@@ -170,7 +171,7 @@ public class ToolClient extends AbstractEntryClient<DockstoreTool> {
         outFormatted(format, NAME_HEADER, DESCRIPTION_HEADER, GIT_HEADER);
 
         for (DockstoreTool container : containers) {
-            String description = "";
+            String description;
             String gitUrl = "";
 
             if (container.getGitUrl() != null && !container.getGitUrl().isEmpty()) {
@@ -730,7 +731,7 @@ public class ToolClient extends AbstractEntryClient<DockstoreTool> {
             } else {
                 // Check if already has been verified
                 if (tagToUpdate.isVerified() && !isScript) {
-                    Scanner scanner = new Scanner(System.in, "utf-8");
+                    Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
                     out("The tag " + versionName + " has already been verified by \'" + tagToUpdate.getVerifiedSource() + "\'");
                     out("Would you like to overwrite this with \'" + verifySource + "\'? (y/n)");
                     String overwrite = scanner.nextLine();
